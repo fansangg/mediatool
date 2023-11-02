@@ -15,3 +15,12 @@ extension SpacerExt on num {
         height: toDouble(),
       );
 }
+
+extension WidgetExt on Widget{
+  Widget onClick(void Function() click){
+    return GestureDetector(
+      onTap: click,
+      child: this,
+    );
+  }
+}

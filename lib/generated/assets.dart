@@ -2,7 +2,10 @@
 class Assets {
   Assets._();
 
-  static const String fontMyfont = 'assets/font/myfont.ttf';
+  static const String fontsMyfont = 'assets/fonts/myfont.ttf';
+  static const String imageDate = 'assets/image/date.png';
+  static const String imageExif = 'assets/image/exif.png';
+  static const String imageFile = 'assets/image/file.png';
   static const String imageIcLauncher = 'assets/image/ic_launcher.png';
 
 }

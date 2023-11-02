@@ -10,7 +10,7 @@ class TranslationX extends StatefulWidget {
   TranslationX({super.key, required this.axisDirection, required this.child, required this.animationController}) : super() {
     switch (axisDirection) {
       case AxisDirection.left:
-        _tween = Tween(begin: Offset(-1, 0), end: Offset(0, 0));
+        _tween = Tween(begin: Offset(-2, 0), end: Offset(0, 0));
       case AxisDirection.right:
         _tween = Tween(begin: Offset(2, 0), end: Offset(0, 0));
       default:
