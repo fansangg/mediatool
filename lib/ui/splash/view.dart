@@ -17,7 +17,7 @@ class SplashPage extends StatelessWidget {
       return SizedBox.expand(
         child: AnimatedOpacity(
           opacity: controller.startAnim.value ? 1 : 0,
-          duration: const Duration(seconds: 2),
+          duration: const Duration(seconds: 1,milliseconds: 500),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,

@@ -9,7 +9,7 @@ class SplashController extends GetxController with GetSingleTickerProviderStateM
   @override
   void onInit() {
     super.onInit();
-    animController = AnimationController(duration: const Duration(seconds: 2), vsync: this);
+    animController = AnimationController(duration: const Duration(seconds: 1,milliseconds: 500), vsync: this);
   }
 
   @override
