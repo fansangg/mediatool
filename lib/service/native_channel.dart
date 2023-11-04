@@ -12,12 +12,16 @@ class NativeChannel extends GetxService{
   static NativeChannel get instance => Get.find();
   final _nativeChannel = MethodChannel("native");
 
-  Future<int> requestPermission() async  {
+  Future<void> requestPermission() async  {
     return await _nativeChannel.invokeMethod("getPermission");
   }
 
   Future<List<dynamic>?> getAllAlbum() async {
     return await _nativeChannel.invokeListMethod("getAllAlbum");
+  }
+
+  void gotoSettings(){
+    _nativeChannel.invokeMethod("gotoSettings");
   }
 }
 

@@ -1,14 +1,12 @@
 package fan.san.media_tool
 
-import android.Manifest
-import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import android.util.Log
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 
 /**
  *@author  fansan
@@ -17,21 +15,37 @@ import io.flutter.plugin.common.MethodChannel
 object FlutterBrigeHelper {
 
     private lateinit var flutterEngine: FlutterEngine
-    private lateinit var toFlutterMethodChannel: MethodChannel
+    private lateinit var toFlutterChannel: EventChannel
     private lateinit var nativeChannel: MethodChannel
-    fun init(flutterEngine: FlutterEngine, callBack:(MethodChannel.Result) -> Unit) {
+    var eventSink:EventChannel.EventSink? = null
+    fun init(flutterEngine: FlutterEngine, callBack:(Any?) -> Unit) {
         this.flutterEngine = flutterEngine
-        toFlutterMethodChannel =
-            MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "flutter")
+        toFlutterChannel =
+            EventChannel(flutterEngine.dartExecutor.binaryMessenger, "flutter")
+        toFlutterChannel.setStreamHandler(object:EventChannel.StreamHandler{
+            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                eventSink = events
+            }
+
+            override fun onCancel(arguments: Any?) {
+                eventSink = null
+            }
+
+        })
         nativeChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "native")
         listenFlutter(callBack)
     }
 
-    private fun listenFlutter(callBack:(MethodChannel.Result) -> Unit) {
+    fun sendState(state:Int){
+        Log.d("fansangg", "send state == $state")
+        eventSink?.success(state)
+    }
+
+    private fun listenFlutter(callBack:(Any?) -> Unit) {
         nativeChannel.setMethodCallHandler { call, result ->
             when (call.method) {
                 "getPermission" -> {
-                    callBack.invoke(result)
+                    callBack.invoke(null)
                 }
 
                 "getAllAlbum" -> {
@@ -44,6 +58,11 @@ object FlutterBrigeHelper {
                         )
                     }
                     result.success(mapList)
+                }
+
+                "gotoSettings" -> {
+                    callBack.invoke("")
+                    result.notImplemented()
                 }
             }
         }

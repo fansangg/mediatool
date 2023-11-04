@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import 'package:media_tool/service/native_channel.dart';
@@ -8,6 +11,7 @@ import 'state.dart';
 class AlbumController extends GetxController {
   final AlbumState state = AlbumState();
   var albumList = <AlbumBean>[].obs;
+  late StreamSubscription<dynamic> permissionStream;
 
   void getAllAlbum() async {
     var ret = await NativeChannel.instance.getAllAlbum();
@@ -18,20 +22,25 @@ class AlbumController extends GetxController {
   }
 
   void getPermission() async {
-    var ret = await NativeChannel.instance.requestPermission();
-    Logger().d("ret == $ret");
+    NativeChannel.instance.requestPermission();
   }
 
   @override
   void onReady() {
+    permissionStream =  const EventChannel("flutter").receiveBroadcastStream().listen((event) {
+      Logger().d("event == $event");
+      state.permissionState.value = event;
+      if(state.permissionState.value == 0){
+        getAllAlbum();
+      }
+    });
     getPermission();
-    //getAllAlbum();
     super.onReady();
   }
 
   @override
   void onClose() {
-    // TODO: implement onClose
+    permissionStream.cancel();
     super.onClose();
   }
 }

@@ -59,8 +59,8 @@ class HomePage extends StatelessWidget {
               color: controller.theme.colorScheme.secondary,
               child: Image.asset(
                 bean.icon,
-                width: 90,
-                height: 90,
+                width: 60,
+                height: 60,
               ),
             ),
           ),

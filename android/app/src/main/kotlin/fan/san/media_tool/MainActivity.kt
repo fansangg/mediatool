@@ -1,8 +1,12 @@
 package fan.san.media_tool
 
 import android.Manifest
+import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -12,34 +16,41 @@ import io.flutter.plugin.common.MethodChannel
 
 class MainActivity: FlutterActivity() {
 
-    lateinit var permissionResult: MethodChannel.Result
-    private val permissionCallback:(result:MethodChannel.Result) -> Unit = {
-        permissionResult = it
+    private var checkAgain = false
+    private val permissionCallback:(Any?) -> Unit = {
+        if (it == null) {
+            requestMediaPermission()
+        }else{
+            startActivity(
+                Intent(
+                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.fromParts("package", context.packageName, null)
+                )
+            )
+            checkAgain = true
+        }
+    }
+
+    private fun requestMediaPermission() {
         val ret = if (Build.VERSION.SDK_INT >= 33) checkSelfPermission(
             Manifest.permission.READ_MEDIA_IMAGES
         ) else checkSelfPermission(
             Manifest.permission.READ_EXTERNAL_STORAGE
         )
-        when{
-            ret == PackageManager.PERMISSION_GRANTED -> {
-                it.success(1)
+        when (ret) {
+            PackageManager.PERMISSION_GRANTED -> {
+                FlutterBrigeHelper.sendState(0)
             }
-
-            shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_IMAGES) -> {
-                it.success(3)
-            }
-
             else -> {
                 val permissions = if (Build.VERSION.SDK_INT >= 33) listOf(
-                    Manifest.permission.READ_MEDIA_IMAGES,
-                    Manifest.permission.READ_MEDIA_VIDEO,
-                    Manifest.permission.ACCESS_MEDIA_LOCATION
+                    Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO, Manifest.permission.ACCESS_MEDIA_LOCATION
                 ) else listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
 
                 requestPermissions(permissions.toTypedArray(), 123)
             }
         }
     }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         FlutterBrigeHelper.init(flutterEngine,permissionCallback)
@@ -52,12 +63,21 @@ class MainActivity: FlutterActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 123){
-            Log.d("fansangg", "666")
             if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }){
-                permissionResult.success(1)
+                FlutterBrigeHelper.sendState(0)
             }else{
-                permissionResult.success(2)
+                if (shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_IMAGES))
+                    FlutterBrigeHelper.sendState(1)
+                else FlutterBrigeHelper.sendState(2)
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (checkAgain){
+            checkAgain = false
+            requestMediaPermission()
         }
     }
 }
