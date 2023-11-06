@@ -66,4 +66,10 @@ object MediaStoreHelper {
             }
         return 0
     }
+
+	fun getNotSync(){
+		val imageUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+		val videoUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+
+	}
 }

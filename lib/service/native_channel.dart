@@ -11,8 +11,17 @@ class NativeChannel extends GetxService{
 
   static NativeChannel get instance => Get.find();
   final _nativeChannel = MethodChannel("native");
+  Rx<int> permissionState = (-1).obs;
 
-  Future<void> requestPermission() async  {
+  @override
+  void onReady() {
+    super.onReady();
+    EventChannel("permission").receiveBroadcastStream().listen((event) {
+      permissionState.value = event;
+    });
+  }
+
+  Future<void> requestPermission() async {
     return await _nativeChannel.invokeMethod("getPermission");
   }
 
@@ -20,7 +29,7 @@ class NativeChannel extends GetxService{
     return await _nativeChannel.invokeListMethod("getAllAlbum");
   }
 
-  void gotoSettings(){
+  void gotoSettings() {
     _nativeChannel.invokeMethod("gotoSettings");
   }
 }

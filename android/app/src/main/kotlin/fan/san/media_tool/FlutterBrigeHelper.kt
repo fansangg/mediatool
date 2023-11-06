@@ -15,30 +15,39 @@ import kotlinx.coroutines.launch
 object FlutterBrigeHelper {
 
     private lateinit var flutterEngine: FlutterEngine
-    private lateinit var toFlutterChannel: EventChannel
     private lateinit var nativeChannel: MethodChannel
+    var permissionSink:EventChannel.EventSink? = null
     var eventSink:EventChannel.EventSink? = null
     fun init(flutterEngine: FlutterEngine, callBack:(Any?) -> Unit) {
         this.flutterEngine = flutterEngine
-        toFlutterChannel =
-            EventChannel(flutterEngine.dartExecutor.binaryMessenger, "flutter")
-        toFlutterChannel.setStreamHandler(object:EventChannel.StreamHandler{
+        EventChannel(flutterEngine.dartExecutor.binaryMessenger, "permission")
+        .setStreamHandler(object:EventChannel.StreamHandler{
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                eventSink = events
+                permissionSink = events
             }
 
             override fun onCancel(arguments: Any?) {
-                eventSink = null
+	            permissionSink = null
             }
 
         })
+	    EventChannel(flutterEngine.dartExecutor.binaryMessenger, "event")
+		    .setStreamHandler(object:EventChannel.StreamHandler{
+			    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+				    eventSink = events
+			    }
+
+			    override fun onCancel(arguments: Any?) {
+				    eventSink = null
+			    }
+
+		    })
         nativeChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "native")
         listenFlutter(callBack)
     }
 
     fun sendState(state:Int){
-        Log.d("fansangg", "send state == $state")
-        eventSink?.success(state)
+	    permissionSink?.success(state)
     }
 
     private fun listenFlutter(callBack:(Any?) -> Unit) {

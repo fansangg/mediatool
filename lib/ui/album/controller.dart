@@ -1,46 +1,50 @@
 import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
 import 'package:media_tool/service/native_channel.dart';
 import 'package:media_tool/ui/album/bean/album_bean.dart';
+import 'package:media_tool/util/ui_ext.dart';
+import 'package:logger/logger.dart';
 
 import 'state.dart';
 
 class AlbumController extends GetxController {
   final AlbumState state = AlbumState();
   var albumList = <AlbumBean>[].obs;
-  late StreamSubscription<dynamic> permissionStream;
+  StreamSubscription<dynamic>? permissionStream;
 
   void getAllAlbum() async {
     var ret = await NativeChannel.instance.getAllAlbum();
     if (ret != null && ret.isNotEmpty) {
-        albumList.value = ret.map((e) => AlbumBean.fromJson(e)).toList();
-        Logger().d("albumList == ${albumList.length}");
+      albumList.value = ret.map((e) => AlbumBean.fromJson(e)).toList();
+      state.uiState.showSuccess();
+    } else {
+      state.uiState.showEmpty();
     }
   }
 
-  void getPermission() async {
-    NativeChannel.instance.requestPermission();
-  }
 
   @override
   void onReady() {
-    permissionStream =  const EventChannel("flutter").receiveBroadcastStream().listen((event) {
-      Logger().d("event == $event");
-      state.permissionState.value = event;
-      if(state.permissionState.value == 0){
-        getAllAlbum();
-      }
-    });
-    getPermission();
+    if(NativeChannel.instance.permissionState.value == 0) {
+      getAllAlbum();
+    }else{
+      NativeChannel.instance.requestPermission();
+      permissionStream = NativeChannel.instance.permissionState.listen((p0) {
+        Logger().d("p0 == $p0");
+        if (p0 == 0) {
+          getAllAlbum();
+        }else{
+          state.uiState.showError();
+        }
+      });
+    }
     super.onReady();
   }
 
   @override
   void onClose() {
-    permissionStream.cancel();
+    permissionStream?.cancel();
     super.onClose();
   }
 }

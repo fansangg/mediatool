@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:media_tool/ui/common/state_layout.dart';
 
 import 'controller.dart';
 
@@ -11,6 +12,6 @@ class ExifPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return StateLayout(state: state.uiState.value, child: const Text("success"));
   }
 }
