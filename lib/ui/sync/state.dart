@@ -8,6 +8,6 @@ class SyncState {
 
   SyncState() {
     ///Initialize variables
-    uiState = UiState().obs;
+    uiState = UiState.loading.obs;
   }
 }

@@ -18,6 +18,7 @@ class MyApp extends StatelessWidget {
       title: 'MediaTool',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        tabBarTheme: const TabBarTheme(labelColor: Colors.black87,unselectedLabelColor: Colors.black26),
         useMaterial3: true,
       ),
       darkTheme: ThemeConfig.dark,

@@ -7,6 +7,8 @@ class Assets {
   static const String imageExif = 'assets/image/exif.png';
   static const String imageFile = 'assets/image/file.png';
   static const String imageIcLauncher = 'assets/image/ic_launcher.png';
+  static const String imagePlaceholderDark = 'assets/image/placeholder_dark.png';
+  static const String imagePlaceholderLight = 'assets/image/placeholder_light.png';
   static const String lottie404 = 'assets/lottie/404.json';
   static const String lottieChicken = 'assets/lottie/Chicken.json';
   static const String lottieChickenDark = 'assets/lottie/Chicken_dark.json';

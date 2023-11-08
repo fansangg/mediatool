@@ -9,7 +9,7 @@ class SplashController extends GetxController with GetSingleTickerProviderStateM
   @override
   void onInit() {
     super.onInit();
-    animController = AnimationController(duration: const Duration(seconds: 1,milliseconds: 500), vsync: this);
+    animController = AnimationController(duration: const Duration(seconds: 1), vsync: this);
   }
 
   @override
@@ -17,7 +17,7 @@ class SplashController extends GetxController with GetSingleTickerProviderStateM
     startAnim.value = true;
     animController.forward();
     Future.delayed(
-      const Duration(seconds: 3),
+      const Duration(seconds: 1,milliseconds: 500),
       () => Get.offNamed(MyRouteConfig.root),
     );
     super.onReady();

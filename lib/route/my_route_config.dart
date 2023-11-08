@@ -11,6 +11,8 @@ import 'package:media_tool/ui/modify/binding.dart';
 import 'package:media_tool/ui/modify/view.dart';
 import 'package:media_tool/ui/splash/binding.dart';
 import 'package:media_tool/ui/splash/view.dart';
+import 'package:media_tool/ui/sync/binding.dart';
+import 'package:media_tool/ui/sync/view.dart';
 
 ///@author  fansan
 ///@version 2023/11/1
@@ -22,6 +24,7 @@ class MyRouteConfig {
   static const String album = "/album";
   static const String modify = "/modify";
   static const String exif = "/exif";
+  static const String sync = "/sync";
 
   static final List<GetPage<dynamic>> routers = [
     GetPage(
@@ -52,6 +55,12 @@ class MyRouteConfig {
       name: exif,
       page: () => ExifPage(),
       binding: ExifBinding(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: sync,
+      page: () => SyncPage(),
+      binding: SyncBinding(),
       transition: Transition.rightToLeft,
     ),
   ];

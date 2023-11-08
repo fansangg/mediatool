@@ -1,5 +1,6 @@
 package fan.san.media_tool
 
+import android.net.Uri
 import android.util.Log
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
@@ -73,6 +74,20 @@ object FlutterBrigeHelper {
                     callBack.invoke("")
                     result.notImplemented()
                 }
+
+	            "checkNoSync" -> {
+					val list = MediaStoreHelper.getNotSync()
+		            result.success(list)
+				}
+
+	            "getVideoThumbnail" -> {
+					val uri = Uri.parse(call.arguments as String)
+		            val path = MediaStoreHelper.getVideoThumbnail(uri)
+		            if (path.isNotEmpty())
+		                result.success(path)
+		            else
+						result.notImplemented()
+				}
             }
         }
     }

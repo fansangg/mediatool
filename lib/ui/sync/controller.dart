@@ -1,17 +1,31 @@
 import 'dart:async';
 
 import 'package:get/get.dart';
+import 'package:logger/logger.dart';
 import 'package:media_tool/util/ui_ext.dart';
 
 import '../../service/native_channel.dart';
+import 'media_entity.dart';
 import 'state.dart';
 
 class SyncController extends GetxController {
   final SyncState state = SyncState();
   StreamSubscription<dynamic>? permissionStream;
 
-  void getResult(){
+  final noDateList = <MediaEntity>[].obs;
+  final notSyncList = <MediaEntity>[].obs;
 
+  void getResult() async {
+    var ret = await NativeChannel.instance.checkNoSync();
+    if(ret != null && ret.isNotEmpty){
+      final result = ret.map((e) => MediaEntity.fromJson(e)).toList();
+      Logger().d("size == ${ret.length} --- result == ${result.toString()}");
+      noDateList.value = result.where((element) => (element.taken??0) <= 0).toList();
+      notSyncList.value = result.where((element) => (element.taken??0) > 0).toList();
+      state.uiState.showSuccess();
+    }else{
+      state.uiState.showEmpty();
+    }
   }
 
   @override

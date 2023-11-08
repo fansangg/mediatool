@@ -74,7 +74,7 @@ class HomePage extends StatelessWidget {
     ).onClick(() {
       switch (index) {
         case 0:
-          Get.toNamed(MyRouteConfig.album);
+          Get.toNamed(MyRouteConfig.sync);
         case 1:
           Get.toNamed(MyRouteConfig.exif);
         default:
