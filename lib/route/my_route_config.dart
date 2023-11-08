@@ -3,6 +3,8 @@
 import 'package:get/get.dart';
 import 'package:media_tool/ui/album/binding.dart';
 import 'package:media_tool/ui/album/view.dart';
+import 'package:media_tool/ui/details/binding.dart';
+import 'package:media_tool/ui/details/view.dart';
 import 'package:media_tool/ui/exif/binding.dart';
 import 'package:media_tool/ui/exif/view.dart';
 import 'package:media_tool/ui/home/binding.dart';
@@ -25,6 +27,7 @@ class MyRouteConfig {
   static const String modify = "/modify";
   static const String exif = "/exif";
   static const String sync = "/sync";
+  static const String details = "/details";
 
   static final List<GetPage<dynamic>> routers = [
     GetPage(
@@ -61,6 +64,12 @@ class MyRouteConfig {
       name: sync,
       page: () => SyncPage(),
       binding: SyncBinding(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: details,
+      page: () => DetailsPage(),
+      binding: DetailsBinding(),
       transition: Transition.rightToLeft,
     ),
   ];

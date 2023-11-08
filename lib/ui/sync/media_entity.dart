@@ -38,7 +38,7 @@ class MediaEntity {
     height = json['height'];
     addTime = json['addTime'];
     uri = json['uri'];
-    thumbnail = json['thumbnail'] != null ? json['thumbnail'].cast<int>() : [];
+    thumbnail = json['thumbnail'];
   }
   String? fileName;
   int? fileSize;
@@ -50,7 +50,7 @@ class MediaEntity {
   int? height;
   int? addTime;
   String? uri;
-  List<int>? thumbnail;
+  String? thumbnail;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -64,6 +64,7 @@ class MediaEntity {
     map['height'] = height;
     map['addTime'] = addTime;
     map['uri'] = uri;
+    map['thumbnail'] = thumbnail;
     return map;
   }
 

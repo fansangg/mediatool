@@ -135,7 +135,8 @@ object MediaStoreHelper {
 							"lastModify" to modified,
 							"addTime" to added,
 							"uri" to fileUri.toString(),
-						)						//if (taken <= 0L || abs(modified * 1000 - taken) > 1000 * 60 )
+							"thumbnail" to getVideoThumbnail(fileUri,mediaType,fileName)
+						)
 						resultList.add(mapData)
 					} while (it.moveToNext())
 				} catch (e: Exception) {
@@ -146,14 +147,14 @@ object MediaStoreHelper {
 		return resultList
 	}
 
-	fun getVideoThumbnail(uri:Uri):String{
-		val fileName = "cache_${uri.toString().substring(uri.toString().lastIndexOf("/") + 1)}"
+	private fun getVideoThumbnail(uri:Uri, mediaType:Int, fileName:String):String{
+		if (mediaType == 1) return ""
 		try {
-			val cache = File(App.mContext.cacheDir,fileName)
+			val cache = File(App.mContext.cacheDir,"$fileName.cache")
 			if (!cache.exists()){
 				val bitmap = App.mContext.contentResolver.loadThumbnail(uri, Size(300,300),null)
 				val outputStream = FileOutputStream(cache)
-				bitmap.compress(Bitmap.CompressFormat.PNG,100,outputStream)
+				bitmap.compress(Bitmap.CompressFormat.PNG,75,outputStream)
 				outputStream.flush()
 				outputStream.close()
 			}
