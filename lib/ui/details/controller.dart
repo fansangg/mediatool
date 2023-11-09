@@ -1,5 +1,7 @@
+import 'package:common_utils/common_utils.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
 import 'package:media_tool/ui/sync/media_entity.dart';
 
 import 'state.dart';
@@ -9,10 +11,18 @@ class DetailsController extends GetxController {
   late MediaEntity entity;
 
   @override
+  void onInit() {
+    super.onInit();
+    entity = Get.arguments;
+    LogUtil.d("entity == $entity",tag: "fansangg");
+  }
+
+  @override
   void onReady() {
     super.onReady();
-    entity = Get.arguments;
-    Logger().d("entity == $entity");
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(statusBarColor: Colors.transparent,statusBarIconBrightness: Brightness.light),
+    );
   }
 
   @override

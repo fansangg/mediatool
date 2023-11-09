@@ -24,7 +24,8 @@ class MediaEntity {
       this.width, 
       this.height, 
       this.addTime, 
-      this.uri, 
+      this.uri,
+      this.orientation,
       this.thumbnail,});
 
   MediaEntity.fromJson(dynamic json) {
@@ -38,6 +39,7 @@ class MediaEntity {
     height = json['height'];
     addTime = json['addTime'];
     uri = json['uri'];
+    orientation = json['orientation'];
     thumbnail = json['thumbnail'];
   }
   String? fileName;
@@ -49,6 +51,7 @@ class MediaEntity {
   int? width;
   int? height;
   int? addTime;
+  int? orientation;
   String? uri;
   String? thumbnail;
 
@@ -64,12 +67,13 @@ class MediaEntity {
     map['height'] = height;
     map['addTime'] = addTime;
     map['uri'] = uri;
+    map['orientation'] = orientation;
     map['thumbnail'] = thumbnail;
     return map;
   }
 
   @override
   String toString() {
-    return 'MediaEntity{fileName: $fileName, fileSize: $fileSize, path: $path, type: $type, taken: $taken, lastModify: $lastModify, width: $width, height: $height, addTime: $addTime, uri: $uri, thumbnail: $thumbnail}';
+    return 'MediaEntity{fileName: $fileName, fileSize: $fileSize, path: $path, type: $type, taken: $taken, lastModify: $lastModify, width: $width, height: $height, addTime: $addTime, uri: $uri, orientation:$orientation,thumbnail: $thumbnail}';
   }
 }

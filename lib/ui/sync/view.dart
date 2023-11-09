@@ -2,9 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:media_tool/generated/assets.dart';
 import 'package:media_tool/route/my_route_config.dart';
-import 'package:media_tool/service/native_channel.dart';
 import 'package:media_tool/ui/common/state_layout.dart';
 import 'package:media_tool/ui/sync/media_entity.dart';
 import 'package:media_tool/util/ui_ext.dart';
@@ -97,7 +95,7 @@ class SyncPage extends StatelessWidget {
     });
   }
 
-  Widget _videoItem(String uri) {
+  /*Widget _videoItem(String uri) {
     return FutureBuilder<String>(
         future: NativeChannel.instance.getVideoThumbnail(uri),
         builder: (context, snapshot) {
@@ -119,5 +117,5 @@ class SyncPage extends StatelessWidget {
             );
           }
         });
-  }
+  }*/
 }

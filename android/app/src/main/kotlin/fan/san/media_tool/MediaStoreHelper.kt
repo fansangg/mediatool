@@ -2,15 +2,18 @@ package fan.san.media_tool
 
 import android.content.ContentUris
 import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
 import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.util.Size
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.FileWriter
+import java.io.OutputStream
 
 /**
  *@author  fansan
@@ -83,7 +86,8 @@ object MediaStoreHelper {
 			MediaStore.Images.Media.DATE_MODIFIED,
 			MediaStore.Images.Media.DATE_TAKEN,
 			MediaStore.Images.Media.SIZE,
-			MediaStore.Files.FileColumns.MEDIA_TYPE
+			MediaStore.Files.FileColumns.MEDIA_TYPE,
+			MediaStore.Video.Media.ORIENTATION,
 		)
 		val selection =
 			"(${MediaStore.Files.FileColumns.MEDIA_TYPE}=${MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE} OR ${MediaStore.Files.FileColumns.MEDIA_TYPE}=${MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO}) AND (${MediaStore.Files.FileColumns.DATE_TAKEN} IS NULL OR ABS(${MediaStore.Files.FileColumns.DATE_MODIFIED} * 1000 - ${MediaStore.Files.FileColumns.DATE_TAKEN}) > 60 * 1000)"
@@ -112,6 +116,7 @@ object MediaStoreHelper {
 						val idIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
 						val mediaTypeIndex =
 							it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE)
+						val orientationIndex = it.getColumnIndexOrThrow(MediaStore.Video.Media.ORIENTATION)
 
 						val taken = it.getLong(takenIndex)
 						val modified = it.getLong(modifiedIndex)
@@ -121,6 +126,7 @@ object MediaStoreHelper {
 						val height = it.getInt(heightIndex)
 						val size = it.getLong(sizeIndex)
 						val fileName = it.getString(nameIndex)
+						val orientation = it.getInt(orientationIndex)
 						val id = it.getLong(idIndex)
 						val mediaType = it.getInt(mediaTypeIndex)
 						val fileUri = ContentUris.withAppendedId(uri, id)
@@ -135,6 +141,7 @@ object MediaStoreHelper {
 							"lastModify" to modified,
 							"addTime" to added,
 							"uri" to fileUri.toString(),
+							"orientation" to orientation,
 							"thumbnail" to getVideoThumbnail(fileUri,mediaType,fileName)
 						)
 						resultList.add(mapData)
@@ -166,5 +173,14 @@ object MediaStoreHelper {
 		}
 
 		return ""
+	}
+
+	fun getVideoCover(path:String):ByteArray{
+		val mmr = MediaMetadataRetriever()
+		mmr.setDataSource(path)
+		val bitmap = mmr.getFrameAtTime(2000 * 1000 * 60)
+		val outputStream = ByteArrayOutputStream()
+		bitmap?.compress(Bitmap.CompressFormat.PNG,80,outputStream)
+		return outputStream.toByteArray()
 	}
 }

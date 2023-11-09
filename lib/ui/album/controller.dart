@@ -1,10 +1,10 @@
 import 'dart:async';
 
+import 'package:common_utils/common_utils.dart';
 import 'package:get/get.dart';
 import 'package:media_tool/service/native_channel.dart';
 import 'package:media_tool/ui/album/bean/album_bean.dart';
 import 'package:media_tool/util/ui_ext.dart';
-import 'package:logger/logger.dart';
 
 import 'state.dart';
 
@@ -31,7 +31,7 @@ class AlbumController extends GetxController {
     }else{
       NativeChannel.instance.requestPermission();
       permissionStream = NativeChannel.instance.permissionState.listen((p0) {
-        Logger().d("p0 == $p0");
+        LogUtil.d("p0 == $p0", tag: "fansangg");
         if (p0 == 0) {
           getAllAlbum();
         }else{

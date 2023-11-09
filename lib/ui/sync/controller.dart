@@ -1,7 +1,7 @@
 import 'dart:async';
 
+import 'package:common_utils/common_utils.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
 import 'package:media_tool/util/ui_ext.dart';
 
 import '../../service/native_channel.dart';
@@ -19,7 +19,7 @@ class SyncController extends GetxController {
     var ret = await NativeChannel.instance.checkNoSync();
     if(ret != null && ret.isNotEmpty){
       final result = ret.map((e) => MediaEntity.fromJson(e)).toList();
-      Logger().d("size == ${ret.length} --- result == ${result.toString()}");
+      LogUtil.d("size == ${ret.length} --- result == ${result.toString()}", tag: "fansangg");
       noDateList.value = result.where((element) => (element.taken??0) <= 0).toList();
       notSyncList.value = result.where((element) => (element.taken??0) > 0).toList();
       state.uiState.showSuccess();

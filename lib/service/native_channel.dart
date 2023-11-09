@@ -37,8 +37,8 @@ class NativeChannel extends GetxService{
     return await _nativeChannel.invokeListMethod("checkNoSync");
   }
 
-  Future<String> getVideoThumbnail(String path) async {
-    return await _nativeChannel.invokeMethod("getVideoThumbnail",path);
+  Future<List<int>?> getVideoThumbnail(String path) async {
+    return await _nativeChannel.invokeListMethod("getVideoThumbnail",path);
   }
 }
 

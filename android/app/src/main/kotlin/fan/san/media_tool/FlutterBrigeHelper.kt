@@ -81,12 +81,11 @@ object FlutterBrigeHelper {
 				}
 
 	            "getVideoThumbnail" -> {
-					/*val uri = Uri.parse(call.arguments as String)
-		            val path = MediaStoreHelper.getVideoThumbnail(uri)
-		            if (path.isNotEmpty())
-		                result.success(path)
+		            val array = MediaStoreHelper.getVideoCover(call.arguments as String)
+		            if (array.isNotEmpty())
+		                result.success(array)
 		            else
-						result.notImplemented()*/
+						result.notImplemented()
 				}
             }
         }
