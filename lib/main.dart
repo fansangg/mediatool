@@ -1,3 +1,4 @@
+import 'package:common_utils/common_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:media_tool/route/my_route_config.dart';
@@ -6,6 +7,7 @@ import 'package:media_tool/service/native_channel.dart';
 
 void main(){
   Get.put(NativeChannel());
+  LogUtil.init(tag:"fansangg",isDebug: true);
   runApp(const MyApp());
 }
 

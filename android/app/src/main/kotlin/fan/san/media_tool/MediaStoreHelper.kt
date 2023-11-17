@@ -2,18 +2,22 @@ package fan.san.media_tool
 
 import android.content.ContentUris
 import android.graphics.Bitmap
+import android.media.MediaCodecInfo
+import android.media.MediaCodecList
+import android.media.MediaExtractor
+import android.media.MediaFormat
 import android.media.MediaMetadataRetriever
-import android.media.ThumbnailUtils
 import android.net.Uri
-import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.util.Size
+import androidx.exifinterface.media.ExifInterface
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
-import java.io.FileWriter
-import java.io.OutputStream
+import java.text.DecimalFormat
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 /**
  *@author  fansan
@@ -97,7 +101,6 @@ object MediaStoreHelper {
 		App.mContext.contentResolver.query(
 			uri, projection, selection, null, "${MediaStore.Images.Media.DATE_MODIFIED} DESC"
 		)?.use {
-			Log.d("fansangg", "cursor count == ${it.count}")
 			if (it.moveToFirst()) {
 				try {
 					do {
@@ -175,12 +178,156 @@ object MediaStoreHelper {
 		return ""
 	}
 
-	fun getVideoCover(path:String):ByteArray{
+	fun getVideoCover(path: String): ByteArray {
 		val mmr = MediaMetadataRetriever()
 		mmr.setDataSource(path)
 		val bitmap = mmr.getFrameAtTime(2000 * 1000 * 60)
 		val outputStream = ByteArrayOutputStream()
-		bitmap?.compress(Bitmap.CompressFormat.PNG,80,outputStream)
+		bitmap?.compress(Bitmap.CompressFormat.PNG,75,outputStream)
 		return outputStream.toByteArray()
+	}
+
+	fun getExif(path: String):Map<String,String> {
+		val exifInterface = ExifInterface(path)
+		val model = exifInterface.getAttribute(ExifInterface.TAG_MODEL)
+		val latitudeRef = exifInterface.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF)
+		val altitudeRef = exifInterface.getAttribute(ExifInterface.TAG_GPS_ALTITUDE_REF)
+		val longitudeRef = exifInterface.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF)
+		val longitude = exifInterface.getAttribute(ExifInterface.TAG_GPS_LONGITUDE)
+		val latitude = exifInterface.getAttribute(ExifInterface.TAG_GPS_LATITUDE)
+		val altitude = exifInterface.getAttributeDouble(ExifInterface.TAG_GPS_ALTITUDE, 0.0)
+		val iso = exifInterface.getAttribute(ExifInterface.TAG_PHOTOGRAPHIC_SENSITIVITY)
+		val aperture = exifInterface.getAttributeDouble(ExifInterface.TAG_MAX_APERTURE_VALUE, 0.0)
+		val brightnessd = exifInterface.getAttributeDouble(ExifInterface.TAG_BRIGHTNESS_VALUE, 0.0)
+		val digitalZoomRatio = exifInterface.getAttribute(ExifInterface.TAG_DIGITAL_ZOOM_RATIO)
+		val exposureTime = exifInterface.getAttributeDouble(ExifInterface.TAG_EXPOSURE_TIME, 0.0)
+		val exposureBias =
+			exifInterface.getAttributeDouble(ExifInterface.TAG_EXPOSURE_BIAS_VALUE, 0.0)
+		val foclLength35mm = exifInterface.getAttribute(ExifInterface.TAG_FOCAL_LENGTH_IN_35MM_FILM)
+		val flash = exifInterface.getAttribute(ExifInterface.TAG_FLASH)
+		val focalLength = exifInterface.getAttributeDouble(ExifInterface.TAG_FOCAL_LENGTH, 0.0)
+		val whiteBalance = exifInterface.getAttributeInt(ExifInterface.TAG_WHITE_BALANCE,0)
+
+		val map = mutableMapOf<String, String>()
+		map["model"] = model ?: ""
+		map["iso"] = iso ?: ""
+		map["brightness"] = brightnessd.toString()
+		map["digitalZoomRatio"] = digitalZoomRatio ?: ""
+		map["exposureTime"] = if (exposureTime == 0.0) "" else "1/${(1 / exposureTime).toInt()}"
+		map["exposureBias"] = "$exposureBias ev"
+		map["foclLength35mm"] = foclLength35mm ?: ""
+		map["flash"] = if (flash == null) "" else if (flash == "0") "未开启" else "已开启"
+		map["focalLength"] = if (focalLength == 0.0) "" else focalLength.toString()
+		map["aperture"] = if (aperture == 0.0) "" else "ƒ${getAperture(aperture)}"
+		map["location"] = getLocation(latitude?:"",latitudeRef?:"",longitude?:"",longitudeRef?:"",altitude)
+		map["whiteBalance"] = if (whiteBalance == 0) "自动" else "手动"
+
+		return map
+		/*Log.d(
+			"fansangg",
+			"model == $model,digitalZoomRatio == $digitalZoomRatio,exposureTime == $exposureTime,Iso == $iso,latitudeRef == $latitudeRef,latitude == $latitude,longitudeRef == $longitudeRef,longitude == $longitude,altitudeRef == $altitudeRef,altitude == $altitude,foclLength35mm == $foclLength35mm,exposureBias == $exposureBias,flash == $flash,focalLength == $focalLength,brightnessd == $brightnessd,aperture == $aperture"
+		)*/
+	}
+
+	private fun getAperture(aperture: Double): String {
+		val decimalFormat = DecimalFormat("#.${"#".repeat(1)}")
+		return decimalFormat.format(sqrt(2.0).pow(aperture))
+	}
+
+	private fun getLocation(
+		latitude: String,
+		latitudeRef: String,
+		longitude: String,
+		longitudeRef: String,
+		altitude: Double
+	):String {
+		try {
+			val latitudeArray = latitude.split(",")
+			val longitudeArray = longitude.split(",")
+			val lat1 = latitudeArray[0].split("/")
+			val lat2 = latitudeArray[1].split("/")
+			val lat3 = latitudeArray[2].split("/")
+			val latRet1 = formatDecimal(lat1[0].toDouble() / lat1[1].toDouble())
+			val latRet2 = formatDecimal(lat2[0].toDouble() / lat2[1].toDouble())
+			val latRet3 = formatDecimal(lat3[0].toDouble() / lat3[1].toDouble())
+
+			val lon1 = longitudeArray[0].split("/")
+			val lon2 = longitudeArray[1].split("/")
+			val lon3 = longitudeArray[2].split("/")
+			val lonRet1 = formatDecimal(lon1[0].toDouble() / lon1[1].toDouble())
+			val lonRet2 = formatDecimal(lon2[0].toDouble() / lon2[1].toDouble())
+			val lonRet3 = formatDecimal(lon3[0].toDouble() / lon3[1].toDouble())
+
+			return "$latRet1 deg $latRet2' $latRet3\" $latitudeRef $lonRet1 deg $lonRet2' $lonRet3\" $longitudeRef ${formatDecimal(altitude)} m Above Sea Level"
+		} catch (e: Exception) {
+			Log.d("fansangg", "${e.message}")
+		}
+
+		return ""
+	}
+
+	fun getVideoInfo(path: String):Map<String,String>{
+
+		val mediaMetadataRetriever = MediaMetadataRetriever()
+		mediaMetadataRetriever.setDataSource(path)
+		val location = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_LOCATION)
+		val bitrate = formatDecimal((mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE)?:"0").toInt() / 1000.0)
+		val duration = formatDecimal((mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?:"0").toInt() / 1000000.0)
+		val framerate = formatDecimal((mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE)?:"0.0").toDouble())
+		val rotation = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)
+
+		var videoCodec = ""
+		var audioCodec = ""
+
+		val mediaExtractor = MediaExtractor()
+		mediaExtractor.setDataSource(path)
+		for (i in 0 until mediaExtractor.trackCount){
+			val format = mediaExtractor.getTrackFormat(i)
+			val mime = format.getString(MediaFormat.KEY_MIME)
+			if (mime?.startsWith("video") == true){
+				videoCodec = when(mime.split("/")[1]){
+					"avc" -> "H264"
+					"hevc" -> "HEVC"
+					"vp9" -> "VP9"
+					"av1" -> "AV1"
+					"mp4" -> "MP4"
+					"mpeg" -> "MPEG"
+					"x-msvideo" -> "AVI"
+					else -> "未知编码器"
+				}
+			}
+
+			if (mime?.startsWith("audio") == true){
+				audioCodec = when(mime.split("/")[1]){
+					"mp4a-latm" -> "AAC"
+					"mp3" -> "MP3"
+					"wab" -> "WAV"
+					"amr" -> "ARM"
+					"flac" -> "FLAC"
+					else -> "未知编码器"
+				}
+			}
+		}
+
+		val map = mutableMapOf<String,String>()
+		map["duration"] = duration
+		map["bitrate"] = bitrate
+		map["framerate"] = framerate
+		map["location"] = location?:""
+		map["rotation"] = rotation?:""
+		map["videoCodec"] = videoCodec
+		map["audioCodec"] = audioCodec
+
+		return map
+
+		/*Log.d("fansangg", "duration == $duration,bitrate == $bitrate,framerate == $framerate,composer == $composer,location == $location,rotation == $rotation,videoCodec == $videoCodec,audioCodec == $audioCodec")*/
+	}
+
+	private fun formatDecimal(number: Double): String {
+		return if (number % 1 == 0.0) {
+			String.format("%.0f", number)
+		} else {
+			String.format("%.2f", number)
+		}
 	}
 }

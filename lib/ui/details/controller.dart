@@ -1,7 +1,6 @@
 import 'package:common_utils/common_utils.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:media_tool/service/native_channel.dart';
 import 'package:media_tool/ui/sync/media_entity.dart';
 
 import 'state.dart';
@@ -18,11 +17,10 @@ class DetailsController extends GetxController {
   }
 
   @override
-  void onReady() {
+  void onReady() async {
     super.onReady();
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(statusBarColor: Colors.transparent,statusBarIconBrightness: Brightness.light),
-    );
+    var ret = await NativeChannel.instance.getExif(entity.path??"",entity.type??0);
+    LogUtil.d("ret == $ret", tag: "fansangg");
   }
 
   @override

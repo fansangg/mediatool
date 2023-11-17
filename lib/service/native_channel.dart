@@ -40,6 +40,10 @@ class NativeChannel extends GetxService{
   Future<List<int>?> getVideoThumbnail(String path) async {
     return await _nativeChannel.invokeListMethod("getVideoThumbnail",path);
   }
+
+  Future<dynamic> getExif(String path,int type) async {
+    return await _nativeChannel.invokeMethod("getExif",{"path":path,"type":type});
+  }
 }
 
 

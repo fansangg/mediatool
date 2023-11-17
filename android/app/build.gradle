@@ -66,6 +66,5 @@ flutter {
 }
 
 dependencies {
-    def lifecycle_version = "2.6.1"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    implementation "androidx.exifinterface:exifinterface:1.3.6"
 }

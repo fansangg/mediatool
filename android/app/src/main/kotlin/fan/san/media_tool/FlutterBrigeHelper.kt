@@ -1,13 +1,9 @@
 package fan.san.media_tool
 
-import android.net.Uri
-import android.util.Log
+import android.provider.MediaStore
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
 
 /**
  *@author  fansan
@@ -86,6 +82,17 @@ object FlutterBrigeHelper {
 		                result.success(array)
 		            else
 						result.notImplemented()
+				}
+
+	            "getExif" -> {
+		            val path = call.argument<String>("path")
+		            val type = call.argument<Int>("type")
+		            val ret = if (type == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
+			            MediaStoreHelper.getExif(path?:"")
+		            }else{
+			            MediaStoreHelper.getVideoInfo(path?:"")
+		            }
+		            result.success(ret)
 				}
             }
         }
