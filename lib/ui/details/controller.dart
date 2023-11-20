@@ -16,11 +16,8 @@ class DetailsController extends GetxController {
     LogUtil.d("entity == $entity",tag: "fansangg");
   }
 
-  @override
-  void onReady() async {
-    super.onReady();
-    var ret = await NativeChannel.instance.getExif(entity.path??"",entity.type??0);
-    LogUtil.d("ret == $ret", tag: "fansangg");
+  Future<dynamic> getExif(){
+    return NativeChannel.instance.getExif(entity.path??"",entity.type??0);
   }
 
   @override

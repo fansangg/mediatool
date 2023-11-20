@@ -107,11 +107,12 @@ class DetailsPage extends StatelessWidget {
                 ),
             maxLines: 2,
           ),
-          8.spacerH,
+          2.spacerH,
           Text(
             controller.entity.path ?? "",
-            style: Theme.of(context).textTheme.bodySmall,
+            style: Theme.of(context).textTheme.bodyMedium,
             maxLines: 2,
+            softWrap: false,
           ),
           6.spacerH,
           Row(
@@ -122,10 +123,10 @@ class DetailsPage extends StatelessWidget {
                     ? "${controller.entity.width} * ${controller.entity.height}"
                     : "${controller.entity.height} * ${controller.entity.width}",
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
-              8.spacerW,
+              16.spacerW,
               Text(
                 _formatBytes(controller.entity.fileSize ?? 0),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -149,10 +150,44 @@ class DetailsPage extends StatelessWidget {
             "修改日期：${DateUtil.formatDateMs((controller.entity.lastModify ?? 0) * 1000, format: "yyyy.MM.dd HH:mm:ss")}",
             style: Theme.of(context).textTheme.bodySmall,
           ),
-          4.spacerH,
+          18.spacerH,
+          Text(
+            controller.entity.type == 1 ? "图片信息" : "视频信息",
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          6.spacerH,
+          FutureBuilder(
+              future: controller.getExif(),
+              builder: (context, snapshot) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children:
+                      snapshot.hasData ? _exifInfo(context, snapshot.data) : [],
+                );
+              })
         ],
       ),
     ).paddingSymmetric(vertical: 12, horizontal: 6);
+  }
+
+  List<Widget> _exifInfo(BuildContext context, dynamic data) {
+    final List<Widget> infos = [];
+    (data as Map).forEach((key, value) {
+      if (value.isNotEmpty) {
+        infos.add(
+          Column(
+            children: [
+              Text(
+                "$key:$value",
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              6.spacerH,
+            ],
+          ),
+        );
+      }
+    });
+    return infos;
   }
 
   String _formatBytes(int bytes) {

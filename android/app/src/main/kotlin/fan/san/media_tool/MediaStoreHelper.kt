@@ -209,18 +209,18 @@ object MediaStoreHelper {
 		val whiteBalance = exifInterface.getAttributeInt(ExifInterface.TAG_WHITE_BALANCE,0)
 
 		val map = mutableMapOf<String, String>()
-		map["model"] = model ?: ""
-		map["iso"] = iso ?: ""
-		map["brightness"] = brightnessd.toString()
-		map["digitalZoomRatio"] = digitalZoomRatio ?: ""
-		map["exposureTime"] = if (exposureTime == 0.0) "" else "1/${(1 / exposureTime).toInt()}"
-		map["exposureBias"] = "$exposureBias ev"
-		map["foclLength35mm"] = foclLength35mm ?: ""
-		map["flash"] = if (flash == null) "" else if (flash == "0") "未开启" else "已开启"
-		map["focalLength"] = if (focalLength == 0.0) "" else focalLength.toString()
-		map["aperture"] = if (aperture == 0.0) "" else "ƒ${getAperture(aperture)}"
-		map["location"] = getLocation(latitude?:"",latitudeRef?:"",longitude?:"",longitudeRef?:"",altitude)
-		map["whiteBalance"] = if (whiteBalance == 0) "自动" else "手动"
+		map["器材"] = model ?: ""
+		map["ISO"] = iso ?: ""
+		map["亮度值"] = brightnessd.toString()
+		map["数码变焦比"] = digitalZoomRatio ?: ""
+		map["曝光时间"] = if (exposureTime == 0.0) "" else "1/${(1 / exposureTime).toInt()}"
+		map["曝光补偿"] = "$exposureBias ev"
+		map["35mm等效焦距"] = foclLength35mm ?: ""
+		map["闪光灯"] = if (flash == null) "" else if (flash == "0") "未开启" else "已开启"
+		map["焦距"] = if (focalLength == 0.0) "" else focalLength.toString()
+		map["光圈值"] = if (aperture == 0.0) "" else "ƒ${getAperture(aperture)}"
+		map["白平衡"] = if (whiteBalance == 0) "自动" else "手动"
+		map["位置"] = getLocation(latitude?:"",latitudeRef?:"",longitude?:"",longitudeRef?:"",altitude)
 
 		return map
 		/*Log.d(
@@ -271,10 +271,11 @@ object MediaStoreHelper {
 		val mediaMetadataRetriever = MediaMetadataRetriever()
 		mediaMetadataRetriever.setDataSource(path)
 		val location = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_LOCATION)
-		val bitrate = formatDecimal((mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE)?:"0").toInt() / 1000.0)
-		val duration = formatDecimal((mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?:"0").toInt() / 1000000.0)
-		val framerate = formatDecimal((mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE)?:"0.0").toDouble())
-		val rotation = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)
+		val bitrate = "${formatDecimal((mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE)?:"0").toInt() / 1000.0)} kb/s"
+		val duration = formatDuration((mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION) ?: "0").toLong())
+
+		var framerate = ""
+		var rotation = ""
 
 		var videoCodec = ""
 		var audioCodec = ""
@@ -285,6 +286,8 @@ object MediaStoreHelper {
 			val format = mediaExtractor.getTrackFormat(i)
 			val mime = format.getString(MediaFormat.KEY_MIME)
 			if (mime?.startsWith("video") == true){
+				framerate = format.getInteger(MediaFormat.KEY_FRAME_RATE,0).toString()
+				rotation = format.getInteger(MediaFormat.KEY_ROTATION,-1).toString()
 				videoCodec = when(mime.split("/")[1]){
 					"avc" -> "H264"
 					"hevc" -> "HEVC"
@@ -310,13 +313,13 @@ object MediaStoreHelper {
 		}
 
 		val map = mutableMapOf<String,String>()
-		map["duration"] = duration
-		map["bitrate"] = bitrate
-		map["framerate"] = framerate
-		map["location"] = location?:""
-		map["rotation"] = rotation?:""
-		map["videoCodec"] = videoCodec
-		map["audioCodec"] = audioCodec
+		map["时长"] = duration
+		map["比特率"] = bitrate
+		map["FPS"] = framerate
+		map["角度"] = rotation?:""
+		map["视频编码"] = videoCodec
+		map["音频编码"] = audioCodec
+		map["位置"] = location?:""
 
 		return map
 
@@ -329,5 +332,14 @@ object MediaStoreHelper {
 		} else {
 			String.format("%.2f", number)
 		}
+	}
+
+	private fun formatDuration(duration: Long): String {
+		val seconds = duration / 1000
+		val minutes = seconds / 60
+		val hours = minutes / 60
+		val remainingMinutes = minutes % 60
+		val remainingSeconds = seconds % 60
+		return String.format("%02d:%02d:%02d", hours, remainingMinutes, remainingSeconds)
 	}
 }
