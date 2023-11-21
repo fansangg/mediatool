@@ -2,7 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:media_tool/generated/assets.dart';
 import 'package:media_tool/route/my_route_config.dart';
+import 'package:media_tool/service/native_channel.dart';
+import 'package:media_tool/ui/common/common_widgets.dart';
 import 'package:media_tool/ui/common/state_layout.dart';
 import 'package:media_tool/ui/sync/media_entity.dart';
 import 'package:media_tool/util/ui_ext.dart';
@@ -17,12 +20,12 @@ class SyncPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
+    return Obx(() {
+      return Scaffold(
         appBar: AppBar(
           title: const Text('查询结果'),
           bottom: TabBar(
+            controller: controller.tabController,
             tabs: const [
               Tab(
                 text: "日期不同步",
@@ -35,37 +38,43 @@ class SyncPage extends StatelessWidget {
             labelColor: Theme.of(context).colorScheme.onSurface,
           ),
         ),
-        body: Obx(() {
-          return StateLayout(
-            state: state.uiState.value,
-            child: TabBarView(
-              children: [
-                _resultPage(0),
-                _resultPage(1),
-              ],
-            ),
-          );
-        }),
-      ),
-    );
+        body: StateLayout(
+          state: state.uiState.value,
+          errorWidget: noPermission(),
+          child: TabBarView(
+            controller: controller.tabController,
+            children: [
+              _resultPage(0),
+              _resultPage(1),
+            ],
+          ),
+        ),
+        floatingActionButton: _syncControllerBtn,
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      );
+    });
   }
 
   Widget _resultPage(int type) {
-    return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4, mainAxisSpacing: 6, crossAxisSpacing: 6),
-      itemBuilder: (context, index) {
-        return _resultItem(
-            type == 0
-                ? controller.notSyncList[index]
-                : controller.noDateList[index],
-            type);
-      },
-      padding: const EdgeInsets.only(left: 6, right: 6, bottom: 30, top: 12),
-      itemCount: type == 0
-          ? controller.notSyncList.length
-          : controller.noDateList.length,
-    );
+    final List<MediaEntity> resultList;
+    if (type == 0) {
+      resultList = controller.notSyncList;
+    } else {
+      resultList = controller.noDateList;
+    }
+
+    return resultList.isEmpty
+        ? commonEmpty("无查询结果")
+        : GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4, mainAxisSpacing: 6, crossAxisSpacing: 6),
+            itemBuilder: (context, index) {
+              return _resultItem(resultList[index], type);
+            },
+            padding:
+                const EdgeInsets.only(left: 6, right: 6, bottom: 30, top: 12),
+            itemCount: resultList.length,
+          );
   }
 
   Widget _resultItem(MediaEntity entity, int type) {
@@ -74,12 +83,11 @@ class SyncPage extends StatelessWidget {
       child: Stack(
         children: [
           Image.file(
-                  File( entity.type == 1
-                      ? entity.path ?? "" : entity.thumbnail ?? ""),
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  height: double.infinity,
-                ),
+            File(entity.type == 1 ? entity.path ?? "" : entity.thumbnail ?? ""),
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+          ),
           if (entity.type == 3)
             const Align(
               alignment: Alignment.center,
@@ -91,31 +99,32 @@ class SyncPage extends StatelessWidget {
         ],
       ),
     ).onClick(() {
-      Get.toNamed(MyRouteConfig.details,arguments: entity);
+      Get.toNamed(MyRouteConfig.details, arguments: entity);
     });
   }
 
-  /*Widget _videoItem(String uri) {
-    return FutureBuilder<String>(
-        future: NativeChannel.instance.getVideoThumbnail(uri),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return Image.file(
-              File(snapshot.data??""),
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
+  Widget? get _syncControllerBtn {
+    switch (state.currentIndex.value) {
+      case 0:
+        if (controller.notSyncList.isNotEmpty) {
+          return commonButton(() {
+            Get.dialog(
+              commonConfirmDialog(
+                Assets.imageWarning,
+                "此操作会将文件的最后修改日期同步为文件的元数据日期",
+                () {
+                  NativeChannel.instance.fixTime(controller.notSyncList, 1);
+                  Get.back();
+                },
+              ),
             );
-          } else {
-            return Image.asset(
-              Get.isDarkMode
-                  ? Assets.imagePlaceholderDark
-                  : Assets.imagePlaceholderLight,
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
-            );
-          }
-        });
-  }*/
+          }, "一键修复");
+        }
+      case 1:
+        if (controller.noDateList.isNotEmpty) {
+          return commonButton(() {}, "一键添加");
+        }
+    }
+    return null;
+  }
 }

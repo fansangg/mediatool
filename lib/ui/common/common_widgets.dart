@@ -20,7 +20,7 @@ Widget commonButton(void Function() onClick, String content) {
       padding: MaterialStatePropertyAll(EdgeInsets.symmetric(vertical: 8, horizontal: 24)),
       foregroundColor: MaterialStatePropertyAll(Colors.white70),
     ),
-    child: Text(content),
+    child: Text(content,style: Theme.of(Get.context!).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600,),),
   );
 }
 
@@ -50,6 +50,87 @@ Widget noPermission() {
             NativeChannel.instance.gotoSettings();
           }, "前往设置"),
       ],
+    ),
+  );
+}
+
+Widget commonEmpty(String text) {
+  return SizedBox.expand(
+    child: Column(
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Lottie.asset(Assets.lottie404, width: 150, height: 150),
+        8.spacerH,
+        Text(
+          text,
+          style: Get.theme.textTheme.bodyLarge,
+        ),
+      ],
+    ),
+  );
+}
+
+Widget commonConfirmDialog(
+    String icon, String content,VoidCallback confirm,{VoidCallback? cancel}) {
+  return Container(
+    color: Colors.transparent,
+    alignment: Alignment.center,
+    child: Card(
+      child: SizedBox(
+        width: Get.width * 0.8,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              12.spacerH,
+              Image.asset(
+                icon,
+                width: 30,
+                height: 30,
+                color: Colors.white,
+              ),
+              Padding(
+                padding: EdgeInsets.only(
+                  left: 12,
+                  right: 12,
+                  top: 12,
+                  bottom: 18,
+                ),
+                child: Text(
+                  content,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(Get.context!).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: commonButton(() {
+                      Get.back();
+                      cancel?.call();
+                    }, " 取消 "),
+                  ),
+                  18.spacerW,
+                  Expanded(
+                    flex: 1,
+                    child: commonButton(() {
+                      confirm();
+                    }, " 确定 "),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     ),
   );
 }

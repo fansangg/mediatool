@@ -3,6 +3,8 @@
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import '../ui/sync/media_entity.dart';
+
 ///@author  fansan
 ///@version 2023/11/3
 ///@des     native_channel 
@@ -43,6 +45,11 @@ class NativeChannel extends GetxService{
 
   Future<dynamic> getExif(String path,int type) async {
     return await _nativeChannel.invokeMethod("getExif",{"path":path,"type":type});
+  }
+
+  void fixTime(List<MediaEntity> data,int type) {
+    final newData = data.map((e) => e.toJson()).toList();
+    _nativeChannel.invokeMethod("fixTime",{"data":newData,"type":type});
   }
 }
 

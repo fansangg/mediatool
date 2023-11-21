@@ -1,6 +1,7 @@
 package fan.san.media_tool
 
 import android.provider.MediaStore
+import android.util.Log
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
@@ -13,11 +14,11 @@ object FlutterBrigeHelper {
 
     private lateinit var flutterEngine: FlutterEngine
     private lateinit var nativeChannel: MethodChannel
-    var permissionSink:EventChannel.EventSink? = null
-    var eventSink:EventChannel.EventSink? = null
+    private var permissionSink:EventChannel.EventSink? = null
+    private var eventSink:EventChannel.EventSink? = null
     fun init(flutterEngine: FlutterEngine, callBack:(Any?) -> Unit) {
         this.flutterEngine = flutterEngine
-        EventChannel(flutterEngine.dartExecutor.binaryMessenger, "permission")
+	    EventChannel(flutterEngine.dartExecutor.binaryMessenger, "permission")
         .setStreamHandler(object:EventChannel.StreamHandler{
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 permissionSink = events
@@ -46,6 +47,10 @@ object FlutterBrigeHelper {
     fun sendState(state:Int){
 	    permissionSink?.success(state)
     }
+
+	fun sendEvent(event:String){
+		eventSink?.success(event)
+	}
 
     private fun listenFlutter(callBack:(Any?) -> Unit) {
         nativeChannel.setMethodCallHandler { call, result ->
@@ -93,6 +98,14 @@ object FlutterBrigeHelper {
 			            MediaStoreHelper.getVideoInfo(path?:"")
 		            }
 		            result.success(ret)
+				}
+
+	            "fixTime" -> {
+					val datas = call.argument<List<Map<String,Any>>>("data")
+					val type = call.argument<Int>("type")
+		            val retMap = mutableMapOf("datas" to datas, "type" to type)
+		            callBack.invoke(retMap)
+		            Log.d("fansangg", "${Thread.currentThread().name}")
 				}
             }
         }

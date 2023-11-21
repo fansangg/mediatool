@@ -1,17 +1,21 @@
 package fan.san.media_tool
 
 import android.content.ContentUris
+import android.content.ContentValues
 import android.graphics.Bitmap
-import android.media.MediaCodecInfo
-import android.media.MediaCodecList
 import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.media.MediaMetadataRetriever
+import android.media.MediaScannerConnection
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
 import android.util.Size
 import androidx.exifinterface.media.ExifInterface
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
+import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -132,7 +136,7 @@ object MediaStoreHelper {
 						val orientation = it.getInt(orientationIndex)
 						val id = it.getLong(idIndex)
 						val mediaType = it.getInt(mediaTypeIndex)
-						val fileUri = ContentUris.withAppendedId(uri, id)
+						val fileUri = ContentUris.withAppendedId(if (mediaType == 1) MediaStore.Images.Media.EXTERNAL_CONTENT_URI else MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id)
 						val mapData = mapOf(
 							"fileName" to fileName,
 							"fileSize" to size,
@@ -341,5 +345,65 @@ object MediaStoreHelper {
 		val remainingMinutes = minutes % 60
 		val remainingSeconds = seconds % 60
 		return String.format("%02d:%02d:%02d", hours, remainingMinutes, remainingSeconds)
+	}
+
+	fun fixLastModified(list:List<Map<String,Any>>){
+		val successList = mutableListOf<String>()
+		if (list.size > 100){
+
+		}else{
+			list.forEachIndexed { index, map ->
+				val path = map["path"] as String
+				val file  = File(path)
+				val newTime = map["taken"] as Long
+				val ret = file.setLastModified(newTime)
+				if (ret){
+					Log.d("fansangg", "path:$path 修改成功")
+					successList.add(path)
+					val jsonObject = JSONObject()
+					jsonObject.put("tag","modify")
+					jsonObject.put("path",path)
+					jsonObject.put("progress",index)
+					jsonObject.put("total",list.size)
+					FlutterBrigeHelper.sendEvent(jsonObject.toString())
+				}
+			}
+		}
+		if (successList.isNotEmpty()){
+			scanFile(successList)
+		}
+	}
+
+	fun fixTakenTime(list:List<Map<String,Any>>){
+		val successList = mutableListOf<String>()
+		if (list.size > 100){
+
+		}else{
+			list.forEachIndexed { index, map ->
+				val contentValues = ContentValues()
+				val lastModify = map["lastModify"] as Long
+				val uri = map["uri"] as String
+				contentValues.put(MediaStore.Images.Media.DATE_MODIFIED,lastModify * 1000)
+				val ret = App.mContext.contentResolver.update(
+					Uri.parse(uri),
+					contentValues,
+					null,
+					null,
+				)
+				if (ret > 0){
+					Log.d("fansangg", "uri:$uri 修改成功")
+					successList.add(map["path"] as String)
+				}
+			}
+		}
+		if (successList.isNotEmpty()){
+			scanFile(successList)
+		}
+	}
+
+	fun scanFile(list:List<String>){
+		MediaScannerConnection.scanFile(App.mContext, list.toTypedArray(), null){
+				_,_ ->
+		}
 	}
 }

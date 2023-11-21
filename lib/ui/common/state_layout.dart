@@ -5,6 +5,7 @@ import 'package:media_tool/ui/common/ui_state.dart';
 import 'package:media_tool/util/ui_ext.dart';
 
 import '../../generated/assets.dart';
+import 'common_widgets.dart';
 
 ///@author  fansan
 ///@version 2023/11/6
@@ -40,7 +41,7 @@ class StateLayout extends StatelessWidget {
       case UiState.failed:
         return errorWidget ?? _defaultError;
       case UiState.empty:
-        return _commonEmpty;
+        return commonEmpty(emptyMessage);
     }
   }
 
@@ -59,24 +60,6 @@ class StateLayout extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget get _commonEmpty {
-    return SizedBox.expand(
-      child: Column(
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Lottie.asset(Assets.lottie404, width: 150, height: 150),
-          8.spacerH,
-          Text(
-            emptyMessage,
-            style: Get.theme.textTheme.bodyLarge,
-          ),
-        ],
       ),
     );
   }
