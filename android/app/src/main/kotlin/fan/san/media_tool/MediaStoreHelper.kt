@@ -277,10 +277,10 @@ object MediaStoreHelper {
 		val location = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_LOCATION)
 		val bitrate = "${formatDecimal((mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE)?:"0").toInt() / 1000.0)} kb/s"
 		val duration = formatDuration((mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION) ?: "0").toLong())
+		val framerate = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE)
 
-		var framerate = ""
+
 		var rotation = ""
-
 		var videoCodec = ""
 		var audioCodec = ""
 
@@ -290,7 +290,7 @@ object MediaStoreHelper {
 			val format = mediaExtractor.getTrackFormat(i)
 			val mime = format.getString(MediaFormat.KEY_MIME)
 			if (mime?.startsWith("video") == true){
-				framerate = format.getInteger(MediaFormat.KEY_FRAME_RATE,0).toString()
+				//framerate = format.getInteger(MediaFormat.KEY_FRAME_RATE,0).toString()
 				rotation = format.getInteger(MediaFormat.KEY_ROTATION,-1).toString()
 				videoCodec = when(mime.split("/")[1]){
 					"avc" -> "H264"
@@ -319,8 +319,8 @@ object MediaStoreHelper {
 		val map = mutableMapOf<String,String>()
 		map["时长"] = duration
 		map["比特率"] = bitrate
-		map["FPS"] = framerate
-		map["角度"] = rotation?:""
+		map["FPS"] = framerate?:"未知"
+		map["角度"] = rotation
 		map["视频编码"] = videoCodec
 		map["音频编码"] = audioCodec
 		map["位置"] = location?:""

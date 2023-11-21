@@ -109,10 +109,12 @@ class DetailsPage extends StatelessWidget {
           ),
           2.spacerH,
           Text(
-            controller.entity.path ?? "",
-            style: Theme.of(context).textTheme.bodyMedium,
+            (controller.entity.path ?? "").fixAutoLines(),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w500,
+            ),
             maxLines: 2,
-            softWrap: false,
+            overflow: TextOverflow.ellipsis,
           ),
           6.spacerH,
           Row(
@@ -203,5 +205,12 @@ class DetailsPage extends StatelessWidget {
       double gb = bytes / (1024 * 1024 * 1024);
       return '${gb.toStringAsFixed(2)} GB';
     }
+  }
+}
+
+extension _FixAutoLines on String {
+
+  String fixAutoLines() {
+    return Characters(this).join('\u{200B}');
   }
 }
