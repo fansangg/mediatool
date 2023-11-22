@@ -5,6 +5,7 @@ import 'package:common_utils/common_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:media_tool/ui/common/common_widgets.dart';
 import 'package:media_tool/util/ui_ext.dart';
 
 import '../../service/native_channel.dart';
@@ -57,10 +58,31 @@ class SyncController extends GetxController with GetSingleTickerProviderStateMix
     }
 
     eventStream =  const EventChannel("event").receiveBroadcastStream().listen((event) {
-      var data = jsonDecode(event) as Map<String,dynamic>;
+      var data = jsonDecode(event) as Map<String, dynamic>;
       LogUtil.d("data = $data", tag: "fansangg");
-      var path = data['path'];
-      notSyncList.removeWhere((element) => element.path == path);
+      switch (data['tag']) {
+        case "modify":
+          var path = data['path'];
+          var progress = data['progress'];
+          var total = data['total'];
+          state.processMap['progress'] = progress;
+          state.processMap['total'] = total;
+          if (Get.isDialogOpen == false) {
+            Get.dialog(processDialog(state.processMap));
+          }
+          notSyncList.removeWhere((element) => element.path == path);
+          if (progress == total) {
+            Get.back();
+          }
+        case "modifyResult":
+          var success = data['success'];
+          var error = data['error'];
+          Get.dialog(commonConfirmDialog("成功：$success,失败：$error"));
+        case "permissionDenied":
+          Get.dialog(commonConfirmDialog("此操作需要您允许修改这些文件"));
+        default:
+          LogUtil.d("no match tag", tag: "fansangg");
+      }
     });
   }
 

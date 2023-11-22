@@ -110,19 +110,21 @@ class SyncPage extends StatelessWidget {
           return commonButton(() {
             Get.dialog(
               commonConfirmDialog(
-                Assets.imageWarning,
-                "此操作会将文件的最后修改日期同步为文件的元数据日期",
-                () {
+                "此操作会将媒体的最后修改日期同步为元数据日期",
+                confirm: () {
                   NativeChannel.instance.fixTime(controller.notSyncList, 1);
-                  Get.back();
                 },
+                icon: Assets.imageWarning,
+                showCancel: true,
               ),
             );
           }, "一键修复");
         }
       case 1:
         if (controller.noDateList.isNotEmpty) {
-          return commonButton(() {}, "一键添加");
+          return commonButton(() {
+
+          }, "一键添加");
         }
     }
     return null;

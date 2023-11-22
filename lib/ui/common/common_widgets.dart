@@ -16,11 +16,18 @@ Widget commonButton(void Function() onClick, String content) {
   return ElevatedButton(
     onPressed: onClick,
     style: ButtonStyle(
-      backgroundColor: MaterialStatePropertyAll(Get.isDarkMode ? Color(0xff3056f4) : Color(0xff111111)),
-      padding: MaterialStatePropertyAll(EdgeInsets.symmetric(vertical: 8, horizontal: 24)),
+      backgroundColor: MaterialStatePropertyAll(
+          Get.isDarkMode ? Color(0xff3056f4) : Color(0xff111111)),
+      padding: MaterialStatePropertyAll(
+          EdgeInsets.symmetric(vertical: 8, horizontal: 24)),
       foregroundColor: MaterialStatePropertyAll(Colors.white70),
     ),
-    child: Text(content,style: Theme.of(Get.context!).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600,),),
+    child: Text(
+      content,
+      style: Theme.of(Get.context!).textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+    ),
   );
 }
 
@@ -72,8 +79,8 @@ Widget commonEmpty(String text) {
   );
 }
 
-Widget commonConfirmDialog(
-    String icon, String content,VoidCallback confirm,{VoidCallback? cancel}) {
+Widget commonConfirmDialog(String content,
+    {String? icon, VoidCallback? confirm,VoidCallback? cancel,bool showCancel = false}) {
   return Container(
     color: Colors.transparent,
     alignment: Alignment.center,
@@ -85,19 +92,20 @@ Widget commonConfirmDialog(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              12.spacerH,
+              4.spacerH,
+              icon != null ?
               Image.asset(
                 icon,
                 width: 30,
                 height: 30,
-                color: Colors.white,
-              ),
+                color: Get.isDarkMode ? Colors.white : Colors.black87,
+              ) : Container(),
               Padding(
                 padding: EdgeInsets.only(
                   left: 12,
                   right: 12,
-                  top: 12,
-                  bottom: 18,
+                  top: 20,
+                  bottom: 20,
                 ),
                 child: Text(
                   content,
@@ -111,24 +119,61 @@ Widget commonConfirmDialog(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
+                  showCancel ?
                   Expanded(
                     flex: 1,
                     child: commonButton(() {
                       Get.back();
                       cancel?.call();
                     }, " 取消 "),
-                  ),
-                  18.spacerW,
+                  ) : Container(),
+                  showCancel ? 18.spacerW : Container(),
                   Expanded(
                     flex: 1,
                     child: commonButton(() {
-                      confirm();
+                      Get.back();
+                      confirm?.call();
                     }, " 确定 "),
                   ),
                 ],
               ),
             ],
           ),
+        ),
+      ),
+    ),
+  );
+}
+
+Widget processDialog(RxMap<dynamic, dynamic> map) {
+  return PopScope(
+    canPop: false,
+    child: Container(
+      color: Colors.transparent,
+      alignment: Alignment.center,
+      child: Card(
+        child: Padding(
+          padding: EdgeInsets.all(18),
+          child: Obx(() {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Lottie.asset(
+                    Get.isDarkMode
+                        ? Assets.lottieChickenDark
+                        : Assets.lottieChicken,
+                    width: 80,
+                    height: 80),
+                12.spacerH,
+                Text(
+                  "${map['progress']}/${map['total']}",
+                  style: Theme.of(Get.context!).textTheme.bodyMedium,
+                )
+              ],
+            );
+          }),
         ),
       ),
     ),

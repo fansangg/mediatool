@@ -14,6 +14,7 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
+import org.json.JSONObject
 
 class MainActivity : FlutterFragmentActivity() {
 
@@ -94,7 +95,9 @@ class MainActivity : FlutterFragmentActivity() {
 					}
 				}
 			} else {
-				FlutterBrigeHelper.sendState(3);
+				val jsonObject = JSONObject()
+				jsonObject.put("tag","permissionDenied")
+				FlutterBrigeHelper.sendEvent(jsonObject.toString())
 			}
 		}
 

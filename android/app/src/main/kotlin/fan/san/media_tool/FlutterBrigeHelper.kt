@@ -105,7 +105,6 @@ object FlutterBrigeHelper {
 					val type = call.argument<Int>("type")
 		            val retMap = mutableMapOf("datas" to datas, "type" to type)
 		            callBack.invoke(retMap)
-		            Log.d("fansangg", "${Thread.currentThread().name}")
 				}
             }
         }

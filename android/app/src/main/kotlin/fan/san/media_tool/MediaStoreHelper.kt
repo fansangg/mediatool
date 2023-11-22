@@ -14,7 +14,9 @@ import android.util.Size
 import androidx.exifinterface.media.ExifInterface
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -348,29 +350,45 @@ object MediaStoreHelper {
 	}
 
 	fun fixLastModified(list:List<Map<String,Any>>){
-		val successList = mutableListOf<String>()
-		if (list.size > 100){
+		MainScope().launch(Dispatchers.IO){
+			val successList = mutableListOf<String>()
+			var errorCount = 0
+			if (list.size > 100){
 
-		}else{
-			list.forEachIndexed { index, map ->
-				val path = map["path"] as String
-				val file  = File(path)
-				val newTime = map["taken"] as Long
-				val ret = file.setLastModified(newTime)
-				if (ret){
-					Log.d("fansangg", "path:$path 修改成功")
-					successList.add(path)
-					val jsonObject = JSONObject()
-					jsonObject.put("tag","modify")
-					jsonObject.put("path",path)
-					jsonObject.put("progress",index)
-					jsonObject.put("total",list.size)
-					FlutterBrigeHelper.sendEvent(jsonObject.toString())
+			}else{
+				list.forEachIndexed { index, map ->
+					delay(500)
+					val path = map["path"] as String
+					val file  = File(path)
+					val newTime = map["taken"] as Long
+					val ret = file.setLastModified(newTime)
+					if (ret){
+						Log.d("fansangg", "path:$path 修改成功")
+						successList.add(path)
+						val jsonObject = JSONObject()
+						jsonObject.put("tag","modify")
+						jsonObject.put("path",path)
+						jsonObject.put("progress",index + 1)
+						jsonObject.put("total",list.size)
+						withContext(Dispatchers.Main){
+							FlutterBrigeHelper.sendEvent(jsonObject.toString())
+						}
+					}else{
+						errorCount++
+					}
 				}
 			}
-		}
-		if (successList.isNotEmpty()){
-			scanFile(successList)
+
+			val jsonObject = JSONObject()
+			jsonObject.put("tag","modifyResult")
+			jsonObject.put("success",successList.size)
+			jsonObject.put("error",errorCount)
+			withContext(Dispatchers.Main){
+				FlutterBrigeHelper.sendEvent(jsonObject.toString())
+			}
+			if (successList.isNotEmpty()){
+				scanFile(successList)
+			}
 		}
 	}
 
@@ -401,7 +419,7 @@ object MediaStoreHelper {
 		}
 	}
 
-	fun scanFile(list:List<String>){
+	private fun scanFile(list:List<String>){
 		MediaScannerConnection.scanFile(App.mContext, list.toTypedArray(), null){
 				_,_ ->
 		}
