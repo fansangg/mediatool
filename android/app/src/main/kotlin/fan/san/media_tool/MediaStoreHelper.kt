@@ -5,8 +5,11 @@ import android.content.ContentValues
 import android.graphics.Bitmap
 import android.media.MediaExtractor
 import android.media.MediaFormat
+import android.media.MediaMetadata
+import android.media.MediaMetadataEditor
 import android.media.MediaMetadataRetriever
 import android.media.MediaScannerConnection
+import android.media.session.MediaSession
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
@@ -17,6 +20,8 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jcodec.containers.mp4.boxes.MetaValue
+import org.jcodec.movtool.MetadataEditor
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -42,7 +47,7 @@ object MediaStoreHelper {
         var firstImgData = ""
         var allCount = 0
         val albumList = arrayListOf<AlbumEntity>()
-        App.mContext.contentResolver.query(
+	    App.mContext.contentResolver.query(
             uri,
             projection,
             null,
@@ -273,7 +278,7 @@ object MediaStoreHelper {
 	}
 
 	fun getVideoInfo(path: String):Map<String,String>{
-
+		test(path)
 		val mediaMetadataRetriever = MediaMetadataRetriever()
 		mediaMetadataRetriever.setDataSource(path)
 		val location = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_LOCATION)
@@ -423,5 +428,28 @@ object MediaStoreHelper {
 		MediaScannerConnection.scanFile(App.mContext, list.toTypedArray(), null){
 				_,_ ->
 		}
+	}
+
+	private fun test(file:String){
+		val editor = MetadataEditor.createFrom(File(file))
+		editor.keyedMeta["creation_time"] = MetaValue.createString("2023-01-01 11:11:11")
+		editor.save(false)
+		Log.d("fansangg", "keymeta == ${editor.keyedMeta}")
+		/*list.forEach {
+			try {
+				if (it.endsWith(".mp4")){
+					val editor = MetadataEditor.createFrom(File(it))
+					val meta = editor.keyedMeta
+					Log.d("fansangg", "keymeta == ${editor.keyedMeta}")
+				}else{
+					val exifInterface = ExifInterface(it)
+					exifInterface.setAttribute(ExifInterface.TAG_DATETIME_ORIGINAL,null)
+					exifInterface.setAttribute(ExifInterface.TAG_OFFSET_TIME_ORIGINAL,null)
+					exifInterface.saveAttributes()
+				}
+			} catch (e: Exception) {
+				Log.d("fansangg", "failed --- ${e.message}")
+			}
+		}*/
 	}
 }

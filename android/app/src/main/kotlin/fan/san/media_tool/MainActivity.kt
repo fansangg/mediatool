@@ -85,7 +85,7 @@ class MainActivity : FlutterFragmentActivity() {
 			if (it.resultCode == RESULT_OK) {
 				when (pendingType) {
 					1 -> {
-						MediaStoreHelper.fixLastModified(pendingList)
+						//MediaStoreHelper.fixLastModified(pendingList)
 					}
 					2 -> {
 

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:common_utils/common_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:media_tool/generated/assets.dart';
@@ -7,6 +8,7 @@ import 'package:media_tool/route/my_route_config.dart';
 import 'package:media_tool/service/native_channel.dart';
 import 'package:media_tool/ui/common/common_widgets.dart';
 import 'package:media_tool/ui/common/state_layout.dart';
+import 'package:media_tool/ui/sync/fix_choose_type_dialog.dart';
 import 'package:media_tool/ui/sync/media_entity.dart';
 import 'package:media_tool/util/ui_ext.dart';
 
@@ -123,7 +125,12 @@ class SyncPage extends StatelessWidget {
       case 1:
         if (controller.noDateList.isNotEmpty) {
           return commonButton(() {
-
+            Get.dialog(FixChooseTypeDialog(
+              click: (type) {
+                NativeChannel.instance.fixTime(controller.noDateList, 1);
+                //LogUtil.d("type == $type", tag: "fansangg");
+              },
+            ));
           }, "一键添加");
         }
     }
