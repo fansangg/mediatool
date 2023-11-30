@@ -36,40 +36,32 @@ class _FixChooseTypeDialogState extends State<FixChooseTypeDialog> {
             children: [
               12.spacerH,
               Text(
-                "选择日期数据源",
+                "选择要添加的日期数据源",
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Flexible(
-                    child: RadioListTile<int>(
-                        value: 1,
-                        title: const Text("添加日期"),
-                        groupValue: type,
-                        onChanged: (v) {
-                          LogUtil.d("changed -- v == $v", tag: "fansangg");
-                          setState(() {
-                            type = v ?? 0;
-                          });
-                        }),
-                  ),
-                  Flexible(
-                    child: RadioListTile<int>(
-                        value: 2,
-                        title: const Text("修改日期"),
-                        groupValue: type,
-                        onChanged: (v) {
-                          LogUtil.d("changed -- v == $v", tag: "fansangg");
-                          setState(() {
-                            type = v ?? 0;
-                          });
-                        }),
-                  ),
-                ],
-              ),
+              RadioListTile<int>(
+                  value: 1,
+                  title: const Text("通过文件名解析"),
+                  groupValue: type,
+                  onChanged: (v) {
+                    LogUtil.d("changed -- v == $v", tag: "fansangg");
+                    setState(() {
+                      type = v ?? 0;
+                    });
+                  }),
+
+              RadioListTile<int>(
+                  value: 2,
+                  title: const Text("修改日期"),
+                  groupValue: type,
+                  onChanged: (v) {
+                    LogUtil.d("changed -- v == $v", tag: "fansangg");
+                    setState(() {
+                      type = v ?? 0;
+                    });
+                  }),
               Row(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.spaceAround,

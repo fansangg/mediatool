@@ -25,9 +25,14 @@ class SyncController extends GetxController with GetSingleTickerProviderStateMix
     var ret = await NativeChannel.instance.checkNoSync();
     if(ret != null){
       final result = ret.map((e) => MediaEntity.fromJson(e)).toList();
-      LogUtil.d("size == ${ret.length} --- result == ${result.toString()}", tag: "fansangg");
-      noDateList.value = result.where((element) => (element.taken??0) <= 0).toList();
-      notSyncList.value = result.where((element) => (element.taken??0) > 0).toList();
+      LogUtil.d("size == ${ret.length} --- result == ${result.toString()}",
+          tag: "fansangg");
+      /*noDateList.value = result
+          .where((element) => (element.taken ?? 0) <= 0 && element.type != 3)
+          .toList();*/
+      noDateList.value = result.where((element) => (element.taken ?? 0) > 0).toList();
+      notSyncList.value =
+          result.where((element) => (element.taken ?? 0) > 0).toList();
     }
     state.uiState.showSuccess();
   }

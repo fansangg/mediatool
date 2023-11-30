@@ -70,5 +70,4 @@ dependencies {
     implementation "androidx.activity:activity-ktx:1.7.2"
     //使用activityforresult 必须添加
     implementation "androidx.fragment:fragment-ktx:1.6.2"
-    implementation 'org.jcodec:jcodec:0.2.5'
 }

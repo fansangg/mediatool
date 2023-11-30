@@ -127,8 +127,7 @@ class SyncPage extends StatelessWidget {
           return commonButton(() {
             Get.dialog(FixChooseTypeDialog(
               click: (type) {
-                NativeChannel.instance.fixTime(controller.noDateList, 1);
-                //LogUtil.d("type == $type", tag: "fansangg");
+                NativeChannel.instance.fixTime(controller.noDateList, 2);
               },
             ));
           }, "一键添加");
